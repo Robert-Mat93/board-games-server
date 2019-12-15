@@ -1,4 +1,10 @@
+github.com/derekstavis/go-qs v0.0.0-20180720192143-9eef69e6c4e7 h1:zmAiXR9h1TCVN/0yCMRYQNE91dNRORpSzMFiqfTTPOs=
+github.com/derekstavis/go-qs v0.0.0-20180720192143-9eef69e6c4e7/go.mod h1:Vgz4nKcG6+B7QcALsWZpmhyQTLSl7nwFGKSrbq2LxEo=
 github.com/gorilla/mux v1.7.3 h1:gnP5JzjVOuiZD07fKKToCAOjS0yOpj/qPETTXCCS6hw=
 github.com/gorilla/mux v1.7.3/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
+github.com/mitchellh/mapstructure v1.1.2 h1:fmNYVwqnSfB9mZU6OS2O6GsXM+wcskZDuKQzvN1EDeE=
+github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
+github.com/pwaller/goupx v0.0.0-20160623083017-1d58e01d5ce2 h1:jqseQkFFoC94bolcHt7j90VPTgVetWlQeqFZoXN+Y2U=
+github.com/pwaller/goupx v0.0.0-20160623083017-1d58e01d5ce2/go.mod h1:XO/Ely/VDivCoLQzV3hMz5dN1y6OAXUEPTwYPWQagS0=
 github.com/segmentio/ksuid v1.0.2 h1:9yBfKyw4ECGTdALaF09Snw3sLJmYIX6AbPJrAy6MrDc=
 github.com/segmentio/ksuid v1.0.2/go.mod h1:BXuJDr2byAiHuQaQtSKoXh1J0YmUDurywOXgB2w+OSU=

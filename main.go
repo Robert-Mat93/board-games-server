@@ -27,6 +27,6 @@ import (
 
 func main() {
 	server := NewServer()
-	log.Fatal("HTTP server error: ", http.ListenAndServe("localhost:5000", server))
+	log.Fatal("HTTP server error: ", http.ListenAndServe(":5000", server))
 
 }

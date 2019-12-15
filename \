@@ -45,8 +45,8 @@ func (server *GameServer) deleteBrokers() {
 	for {
 		id := <-server.notif
 		server.lock.Lock()
+		defer server.lock.Unlock()
 		delete(server.brokers, id)
-		server.lock.Unlock()
 	}
 }
 
@@ -140,11 +140,13 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return
 		}
+		fmt.Printf("%#+v\n", query)
 		err = mapstructure.Decode(query, &event)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return
 		}
+		fmt.Printf("%#+v\n", event)
 		broker, exists := server.brokers[event.GameID]
 		if !exists {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
