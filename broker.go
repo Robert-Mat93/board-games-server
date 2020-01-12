@@ -62,6 +62,7 @@ func (broker *Broker) listen() {
 				return
 			}
 		case event := <-broker.Notifier:
+			log.Println("sending event to clients")
 			// We got a new event from the outside!
 			// Send event to all connected clients
 			for clientMessageChan, _ := range broker.clients {

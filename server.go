@@ -19,6 +19,11 @@ type GameServer struct {
 	lock    sync.Mutex
 }
 
+type User struct {
+	Name string
+	ID string
+}
+
 func NewServer() (server *GameServer) {
 	server = &GameServer{
 		brokers: make(map[string]*Broker),
@@ -58,6 +63,24 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	switch segments[1] {
+	case "user_list":
+		var users []User
+		users = append(users, User{Name: "Ivan", ID: "jasifhsfdshfiud"})
+		users = append(users, User{Name: "Roberto", ID: "advdfgdfg"})
+		users = append(users, User{Name: "Renato", ID: "dscnrtfsdgtrhb"})
+		users = append(users, User{Name: "Robert", ID: "lvnfidfnbdlewf"})
+		users = append(users, User{Name: "Ripper", ID: "asdashtrrgrtger"})
+		js, err := json.Marshal(users)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("sending user list")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Write(js)
+
 	case "start_game":
 		id := ksuid.New().String()
 		response := GameStarResponse{GameID: id}
@@ -77,6 +100,7 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case "join_game":
 		// Make sure that the writer supports flushing.
 		//
+		log.Println("join game");
 		flusher, ok := rw.(http.Flusher)
 
 		if !ok {
@@ -131,6 +155,7 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			flusher.Flush()
 		}
 	case "game_event":
+		log.Println("event")
 		var event GameEvent
 		buf, err := ioutil.ReadAll(req.Body)
 		if err != nil {
