@@ -3,6 +3,7 @@ module board-games-server
 go 1.13
 
 require (
+	github.com/aws/aws-sdk-go v1.28.0
 	github.com/derekstavis/go-qs v0.0.0-20180720192143-9eef69e6c4e7
 	github.com/gorilla/mux v1.7.3
 	github.com/mitchellh/mapstructure v1.1.2

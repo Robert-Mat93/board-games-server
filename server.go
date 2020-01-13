@@ -14,20 +14,21 @@ import (
 )
 
 type GameServer struct {
-	brokers map[string]*Broker
-	notif   chan string
-	lock    sync.Mutex
-}
-
-type User struct {
-	Name string
-	ID string
+	brokers   map[string]*Broker
+	notif     chan string
+	connector Connector
+	lock      sync.Mutex
 }
 
 func NewServer() (server *GameServer) {
+	connector, err := NewConnector(DynamoDB)
+	if err != nil {
+		return nil
+	}
 	server = &GameServer{
-		brokers: make(map[string]*Broker),
-		notif:   make(chan string),
+		brokers:   make(map[string]*Broker),
+		notif:     make(chan string),
+		connector: connector,
 	}
 
 	go server.deleteBrokers()
@@ -65,11 +66,15 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	switch segments[1] {
 	case "user_list":
 		var users []User
+		//users = server.connector.GetUsers()
+
 		users = append(users, User{Name: "Ivan", ID: "jasifhsfdshfiud"})
 		users = append(users, User{Name: "Roberto", ID: "advdfgdfg"})
 		users = append(users, User{Name: "Renato", ID: "dscnrtfsdgtrhb"})
 		users = append(users, User{Name: "Robert", ID: "lvnfidfnbdlewf"})
 		users = append(users, User{Name: "Ripper", ID: "asdashtrrgrtger"})
+
+		log.Printf("%#v", users)
 		js, err := json.Marshal(users)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -100,7 +105,7 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case "join_game":
 		// Make sure that the writer supports flushing.
 		//
-		log.Println("join game");
+		log.Println("join game")
 		flusher, ok := rw.(http.Flusher)
 
 		if !ok {
