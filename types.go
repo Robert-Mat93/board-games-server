@@ -13,3 +13,7 @@ type User struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
+
+type LogIn struct {
+	UserID string `json:"user_id"`
+}

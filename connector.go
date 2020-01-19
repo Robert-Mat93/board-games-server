@@ -6,7 +6,7 @@ import (
 
 type Connector interface {
 	GetUsers() []User
-	AddUser(*User)
+	AddUser(*User) error
 }
 
 type ConnectorType int

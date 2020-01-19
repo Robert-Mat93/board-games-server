@@ -15,6 +15,7 @@ import (
 
 type GameServer struct {
 	brokers   map[string]*Broker
+	clients   map[string]chan string
 	notif     chan string
 	connector Connector
 	lock      sync.Mutex
@@ -66,24 +67,45 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	switch segments[1] {
 	case "user_list":
 		var users []User
-		//users = server.connector.GetUsers()
+		users = server.connector.GetUsers()
 
-		users = append(users, User{Name: "Ivan", ID: "jasifhsfdshfiud"})
-		users = append(users, User{Name: "Roberto", ID: "advdfgdfg"})
-		users = append(users, User{Name: "Renato", ID: "dscnrtfsdgtrhb"})
-		users = append(users, User{Name: "Robert", ID: "lvnfidfnbdlewf"})
-		users = append(users, User{Name: "Ripper", ID: "asdashtrrgrtger"})
-
-		log.Printf("%#v", users)
 		js, err := json.Marshal(users)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("sending user list")
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Content-Type", "application/json")
+		rw.Write(js)
+
+	case "create_user":
+		var user = &User{}
+		buf, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			log.Printf("Failed to read body: %s", err.Error())
+			return
+		}
+		query, err := qs.Unmarshal(string(buf))
+		if err != nil {
+			log.Printf("Failed to unmarshal body: %s", err.Error())
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = mapstructure.Decode(query, user)
+		if err != nil {
+			log.Printf("Failed to decode: %s", err.Error())
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = server.connector.AddUser(user)
+		if err != nil {
+			log.Printf("Failed to add user: %s", err.Error())
+			http.Error(rw, err.Error(), 401)
+		}
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
+		js, _ := json.Marshal(user)
 		rw.Write(js)
 
 	case "start_game":
@@ -101,11 +123,27 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Content-Type", "application/json")
 		rw.Write(js)
+	case "log_in":
+		var logIn = &LogIn{}
+		buf, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			log.Printf("Failed to read body: %s", err.Error())
+			return
+		}
+		query, err := qs.Unmarshal(string(buf))
+		if err != nil {
+			log.Printf("Failed to unmarshal body: %s", err.Error())
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = mapstructure.Decode(query, logIn)
+		if err != nil {
+			log.Printf("Failed to decode: %s", err.Error())
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 	case "join_game":
-		// Make sure that the writer supports flushing.
-		//
-		log.Println("join game")
 		flusher, ok := rw.(http.Flusher)
 
 		if !ok {
@@ -160,7 +198,6 @@ func (server *GameServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			flusher.Flush()
 		}
 	case "game_event":
-		log.Println("event")
 		var event GameEvent
 		buf, err := ioutil.ReadAll(req.Body)
 		if err != nil {

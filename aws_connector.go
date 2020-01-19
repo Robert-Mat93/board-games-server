@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
+	"github.com/segmentio/ksuid"
 	"log"
 )
 
@@ -54,4 +55,28 @@ func (conn *awsConnector) GetUsers() []User {
 	return users
 }
 
-func (conn *awsConnector) AddUser(user *User) {}
+func (conn *awsConnector) AddUser(user *User) error {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+	user.ID = ksuid.New().String()
+	av, err := dynamodbattribute.MarshalMap(user)
+	if err != nil {
+		log.Printf("Failed to create item: %s", err.Error())
+		return err
+	}
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("BoardGameUsers"),
+	}
+
+	_, err = svc.PutItem(input)
+	if err != nil {
+		log.Printf("Failed to add item: %s", err.Error())
+		return err
+	}
+	return nil
+}
